@@ -1,0 +1,46 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Apr 23 20:03:02 2024
+
+@author: user
+"""
+
+#python小程式撰寫，練習用excel自動操作套件，自動套印業者產源登記表。
+# 練習三個套件:xlwings、pandas、openpyxl，將excel總表石牌的業者資訊，套到產源登記表，改進直接操作excel的手續。
+# 經實作結果，用到的是openpyxl，發現自己對這三個套件很多function還不熟悉，做出來的成品，之後還可以改良，測試只儲存一個活頁簿，之後可以繼續精進。
+# 程式邏輯: 用pandas讀取業者資訊總表，觀察需要資訊，選擇用index當順序，用df.loc定位每個要填入資料，其實是固定公式；
+# 用openpyxl開啟產源登記表，觀察需要修改的excel儲存格編號，與上對照，逐一設定填入資訊來源，最後再設定另存的資料匣，逐筆另存。
+
+import pandas as pd
+from openpyxl import load_workbook
+
+
+def save_recycle_per_unit():
+    
+    df = pd.read_excel(r"D:\coding-journey\practice\excel_practice\修正-更新至113-0331臺北市政府環境保局北投區隊代清潔業者基本資料表(測試).xlsx", sheet_name="石牌")
+    #檢查讀取資料
+    #print(df)
+    #print(df.columns)
+    #print(df.index)
+    
+    wb = load_workbook(r"D:\coding-journey\practice\excel_practice\修正-更新至113-0331臺北市政府環境保局北投區隊代清潔業者基本資料表.xlsx")
+    target = wb["產源登記表"]
+
+    for i in df.index:
+        target["G3"] = df.loc[i,'收運\n戶數']
+        target["C4"] = df.loc[i, '收運\n產源地址']
+        target["C5"] = df.loc[i, '收運產源\n聯絡人']
+        target["F5"] = df.loc[i, '收運產源\n電話']
+        target["D6"] = df.loc[i, '代清潔業者\n姓名']
+        target["D7"] = df.loc[i, '代清潔業者\n電話']
+        target["F6"] = df.loc[i, '本局\n垃圾清運點位址']
+        target["F7"] = df.loc[i, '車輛\n局編號']
+        a = df.loc[i, '代清-垃圾\n(每日平均量/公斤)']
+        b = df.loc[i, '代清-資收物\n(每日平均量/公斤)']
+        c = df.loc[i, '代清-廚餘\n(每日平均量/公斤)']
+        d = a+b+c
+        target["C12"] = " ▓垃圾:_____{}____公斤/▓資收物:__{}___公斤/▓廚餘:____{}______公斤\n(三者加總總噸數:________{}___________公斤)".format(a, b, c, d)
+         
+        wb.save(r"D:\coding-journey\practice\excel_practice\代清業者個別產源登記表\個別產源登記表_{}.xlsx".format(i+1))
+         
+save_recycle_per_unit()
